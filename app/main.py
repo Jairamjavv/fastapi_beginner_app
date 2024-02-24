@@ -5,6 +5,9 @@ from pydantic import BaseModel
 from typing import Any, Optional
 from random import randint
 
+# from app.db_connection import get_db_connection
+from db_connection import get_db_connection
+
 """
 TODO: create post/s
     TODO: fetch details from user
@@ -23,6 +26,9 @@ app = FastAPI()
 
 # in memory storage of posts
 posts = {}
+
+conn = get_db_connection()
+print(30, conn)
 
 
 class PostModel(BaseModel):
@@ -47,12 +53,12 @@ def create_post(post_payload: PostModel) -> dict[str, Any]:
     return {"message": f"Post with id:{id_} created.", "status_code": 200}
 
 
-@app.get("/posts")
+@app.get("/posts", status_code=status.HTTP_200_OK)
 def get_posts() -> dict:
     return posts
 
 
-@app.get("/posts/{id}")  # path parameter
+@app.get("/posts/{id}", status_code=status.HTTP_200_OK)  # path parameter
 def get_post(id: int, response: Response) -> dict[str, Any]:
     for k, v in posts.items():
         if k == id:
@@ -68,7 +74,7 @@ def get_post(id: int, response: Response) -> dict[str, Any]:
     )
 
 
-@app.patch("/posts/{id}")
+@app.patch("/posts/{id}", status_code=status.HTTP_206_PARTIAL_CONTENT)
 def update_post(id: int, update_post: PostModel) -> Response:
     if id in posts.keys():
         posts[id]["title"] = (
